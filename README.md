@@ -1,4 +1,68 @@
-# Astro Starter Kit: Basics
+# stressfulDev 2025
+
+A modern web portfolio and personal website built with Astro, Three.js, and Tailwind CSS.
+
+## Features
+
+- Responsive design with mobile-first approach
+- Interactive 3D model viewer with the Medusa Gorgon bust
+- Smooth animations and transitions
+- Mobile-friendly navigation with animated dropdown menu
+- Modern UI with dark theme
+
+## Technologies Used
+
+- [Astro](https://astro.build/) - Static Site Generator
+- [Three.js](https://threejs.org/) - 3D Graphics Library
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS Framework
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/stressfuldev-2025.git
+cd stressfuldev-2025
+```
+
+2. Install dependencies
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Start the development server
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+4. Open your browser and navigate to `http://localhost:4321`
+
+## Building for Production
+
+```bash
+npm run build
+# or
+yarn build
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- 3D Model: Bust of Medusa Gorgon
+- Icons: [Heroicons](https://heroicons.com/)
 
 ```sh
 yarn create astro@latest -- --template basics

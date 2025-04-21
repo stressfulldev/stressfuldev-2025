@@ -1,0 +1,11 @@
+Model Information:
+* title:	Bust of Medusa Gorgon
+* source:	https://sketchfab.com/3d-models/bust-of-medusa-gorgon-77de03b10e054fa1ac032db01ac09cce
+* author:	quadro-pro (https://sketchfab.com/quadro-pro)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Bust of Medusa Gorgon" (https://sketchfab.com/3d-models/bust-of-medusa-gorgon-77de03b10e054fa1ac032db01ac09cce) by quadro-pro (https://sketchfab.com/quadro-pro) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

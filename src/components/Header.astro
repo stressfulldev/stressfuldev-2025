@@ -1,0 +1,148 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "stressfulDev" } = Astro.props;
+---
+
+<header class="fixed w-full top-0 z-50 backdrop-blur-sm">
+  <nav class="container mx-auto px-4 py-4">
+    <div class="flex items-center justify-between">
+      <a href="/" class="flex items-center">
+        <img src="/src/assets/stressfulDev-logo.png" alt={title} class="w-9 h-9" />
+        <span class="px-2 text-white text-2xl font-mono font-bold">stressfulDev</span>
+      </a>
+      
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex space-x-8 font-mono">
+        <a href="/" class="text-gray-300 hover:text-white transition-colors font-body">Home</a>
+        <a href="#" class="text-gray-300 hover:text-white transition-colors font-body">Blogs</a>
+        <a href="#" class="text-gray-300 hover:text-white transition-colors font-body">Projects</a>
+        <a href="#" class="text-gray-300 hover:text-white transition-colors font-body">Resume</a>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobile-menu-button" class="md:hidden text-white p-2 z-50 relative" aria-label="Menu">
+        <div class="icon-container">
+          <!-- Burger Icon -->
+          <svg id="burger-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 absolute top-0 left-0 transition-all duration-300 ease-in-out">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+          
+          <!-- Close Icon (X) -->
+          <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 absolute top-0 left-0 transition-all duration-300 ease-in-out opacity-0 rotate-90 scale-0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </div>
+      </button>
+    </div>
+
+    <!-- Mobile Navigation - Dropdown -->
+    <div id="mobile-menu" class="hidden md:hidden absolute top-full right-0 w-2/4 bg-black/15 transform transition-all duration-500 ease-in-out rounded-lg shadow-lg">
+      <div class="px-4 py-4">
+        <!-- Menu items -->
+        <div class="space-y-4 font-mono">
+          <a href="/" class="menu-item block text-lg text-gray-300 hover:text-white transition-colors font-body opacity-0 translate-y-4">Home</a>
+          <a href="#" class="menu-item block text-lg text-gray-300 hover:text-white transition-colors font-body opacity-0 translate-y-4">Blogs</a>
+          <a href="#" class="menu-item block text-lg text-gray-300 hover:text-white transition-colors font-body opacity-0 translate-y-4">Projects</a>
+          <a href="#" class="menu-item block text-lg text-gray-300 hover:text-white transition-colors font-body opacity-0 translate-y-4">Resume</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const burgerIcon = document.getElementById('burger-icon');
+  const closeIcon = document.getElementById('close-icon');
+  const menuItems = document.querySelectorAll('.menu-item');
+
+  if (mobileMenuButton && mobileMenu && burgerIcon && closeIcon) {
+    let isOpen = false;
+
+    mobileMenuButton.addEventListener('click', () => {
+      isOpen = !isOpen;
+      
+      // Toggle menu
+      if (isOpen) {
+        // First make the menu visible but still hidden
+        mobileMenu.classList.remove('hidden');
+        
+        // Force a reflow to ensure the transition works
+        void mobileMenu.offsetWidth;
+        
+        // Then animate it in
+        mobileMenu.classList.remove('opacity-0', '-translate-y-4', 'scale-95');
+        mobileMenu.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+        
+        // Animate icons
+        burgerIcon.classList.add('opacity-0', 'rotate-90', 'scale-0');
+        closeIcon.classList.remove('opacity-0', 'rotate-90', 'scale-0');
+        
+        // Animate menu items one by one from top to bottom
+        menuItems.forEach((item, index) => {
+          setTimeout(() => {
+            item.classList.remove('opacity-0', 'translate-y-4');
+            item.classList.add('opacity-100', 'translate-y-0');
+          }, 100 * index);
+        });
+      } else {
+        // Animate menu items one by one from bottom to top (fade only, no movement)
+        const itemsArray = Array.from(menuItems);
+        itemsArray.reverse().forEach((item, index) => {
+          setTimeout(() => {
+            item.classList.remove('opacity-100');
+            item.classList.add('opacity-0');
+          }, 100 * index);
+        });
+        
+        // Wait for items to animate before hiding the menu
+        setTimeout(() => {
+          mobileMenu.classList.add('opacity-0', '-translate-y-4', 'scale-95');
+          mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+          
+          // Animate icons
+          burgerIcon.classList.remove('opacity-0', 'rotate-90', 'scale-0');
+          closeIcon.classList.add('opacity-0', 'rotate-90', 'scale-0');
+          
+          setTimeout(() => {
+            mobileMenu.classList.add('hidden');
+          }, 500);
+        }, 100 * menuItems.length);
+      }
+    });
+  }
+</script>
+
+<style>
+  /* Icon container */
+  .icon-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Menu dropdown animation */
+  #mobile-menu {
+    opacity: 0;
+    transform: translateY(-2rem) scale(0.95);
+    transform-origin: top right;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+  }
+
+  #mobile-menu.opacity-100 {
+    opacity: 1;
+  }
+
+  #mobile-menu.translate-y-0 {
+    transform: translateY(0) scale(1);
+  }
+  
+  /* Menu item animation */
+  .menu-item {
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  }
+</style> 

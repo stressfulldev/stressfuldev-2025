@@ -1,0 +1,74 @@
+---
+import ThreeCube from './Medusa.astro';
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  description?: string;
+}
+
+const { 
+  title = "Hi, I'm Hans Luber",
+  subtitle = "Full Stack Developer",
+  description = "Crafting digital experiences with code and creativity. Specializing in modern web development and innovative solutions."
+} = Astro.props;
+---
+
+<section class="min-h-[calc(100vh-4rem)] flex items-center py-12">
+  <div class="container mx-auto px-4">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <!-- Left Column - 3D Model -->
+      <div class="flex items-center justify-center order-1 md:order-1">
+        <div class="w-full max-w-2xl aspect-square">
+          <ThreeCube />
+        </div>
+      </div>
+
+      <!-- Right Column - Text Content -->
+      <div class="flex flex-col space-y-6 order-2 md:order-2">
+        <h1 class="text-5xl md:text-6xl font-bold font-mono text-[#E6C8A5] animate-text-color">
+          {title}
+        </h1>
+        <h2 class="text-2xl md:text-3xl text-gray-300 font-mono animate-text-color-delayed">
+          {subtitle}
+        </h2>
+        <p class="text-lg text-gray-400 font-mono leading-relaxed max-w-xl animate-text-color-delayed-2">
+          {description}
+        </p>
+        <!-- <div class="flex space-x-4 pt-4">
+          <a href="/contact" class="px-6 py-3 bg-white text-black rounded-lg font-mono font-bold hover:bg-gray-200 transition-colors">
+            Contact Me
+          </a>
+          <a href="/projects" class="px-6 py-3 border border-white text-white rounded-lg font-mono font-bold hover:bg-white/10 transition-colors">
+            View Projects
+          </a>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes textColorChange {
+    0% {
+      color: #E6C8A5; /* skin tone color */
+    }
+    100% {
+      color: #FFFFFF; /* white */
+    }
+  }
+
+  .animate-text-color {
+    animation: textColorChange 4s ease-in-out forwards;
+  }
+
+  .animate-text-color-delayed {
+    animation: textColorChange 4s ease-in-out 1s forwards;
+    color: #E6C8A5; /* Start with skin tone */
+  }
+
+  .animate-text-color-delayed-2 {
+    animation: textColorChange 4s ease-in-out 2s forwards;
+    color: #E6C8A5; /* Start with skin tone */
+  }
+</style> 

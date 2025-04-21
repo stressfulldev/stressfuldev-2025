@@ -1,0 +1,291 @@
+<div id="scene-container" class="w-full h-full"></div>
+
+<script>
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+  import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+  // Scene
+  const container = document.getElementById('scene-container');
+  if (!container) throw new Error('Container not found');
+
+  const scene = new THREE.Scene();
+
+  // Camera
+  const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+  camera.position.z = 3;
+
+  // Object
+  let model: THREE.Group | null = null;
+  const loader = new GLTFLoader();
+  
+  // Create materials for different parts
+  const snakeAndSaddleMaterial = new THREE.MeshPhysicalMaterial({ 
+    color: 0x2F8C46,  // green for snakes and saddle
+    metalness: 0.4,
+    roughness: 0.2,
+    transmission: 0,
+    transparent: false,
+    side: THREE.DoubleSide,
+    clearcoat: 0.6,
+    clearcoatRoughness: 0.1,
+  });
+
+  const detailPatternMaterial = new THREE.MeshPhysicalMaterial({ 
+    color: 0xFF0000,  // red for detailed patterns
+    metalness: 0.3,
+    roughness: 0.2,
+    transmission: 0,
+    transparent: false,
+    side: THREE.DoubleSide,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.2,
+  });
+
+  const skinMaterial = new THREE.MeshPhysicalMaterial({ 
+    color: 0xE6C8A5,  // beige for skin
+    metalness: 0.2,
+    roughness: 0.3,
+    transmission: 0,
+    transparent: false,
+    side: THREE.DoubleSide,
+    clearcoat: 0.4,
+    clearcoatRoughness: 0.2,
+  });
+
+  // Interaction state
+  let isMouseDown = false;
+  let startMouseX = 0;
+  let currentMouseX = 0;
+  let targetRotationY = 0;
+  let currentRotationY = 0;
+  const DRAG_THRESHOLD = 0.05;
+  
+  // Touch interaction state
+  let isTouching = false;
+  let startTouchX = 0;
+  let currentTouchX = 0;
+
+  // Animation state
+  let animatedMeshes: { mesh: THREE.Mesh, originalPositions: Float32Array }[] = [];
+  let time = 0;
+  const WAVE_SPEED = 1.5;  // Slightly slower for smoother movement
+  const WAVE_INTENSITY = 0.08;  // Slightly reduced for more subtle movement
+
+  // Load the model
+  loader.load(
+    '/bust_of_medusa_gorgon/scene.gltf',
+    (gltf: GLTF) => {
+      model = gltf.scene;
+      
+      // Apply materials to specific parts
+      model.traverse((node: THREE.Object3D) => {
+        if (node instanceof THREE.Mesh) {
+          // Log the object name for debugging
+          console.log('Object name:', node.name);
+          
+          // Store mesh and original positions for all parts
+          if (node.geometry) {
+            const positions = node.geometry.attributes.position.array;
+            animatedMeshes.push({
+              mesh: node,
+              originalPositions: new Float32Array(positions)
+            });
+          }
+          
+          // Apply different materials based on object name
+          switch(node.name) {
+            case 'Object_2':  // Snake and saddle parts
+              node.material = snakeAndSaddleMaterial;
+              break;
+            case 'Object_3':  // Detailed pattern parts
+              node.material = detailPatternMaterial;
+              break;
+            case 'Object_4':  // Face/skin parts
+              node.material = skinMaterial;
+              break;
+            case 'Object_5':  // Additional face/skin parts
+              node.material = skinMaterial;
+              break;
+          }
+        }
+      });
+      
+      // Center and scale the model
+      const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const scale = 3 / maxDim;
+      model.scale.setScalar(scale);
+      
+      model.position.sub(center.multiplyScalar(scale));
+      
+      // Set initial rotation to show the face better
+      model.rotation.y = -Math.PI / 6;
+      currentRotationY = model.rotation.y;
+      targetRotationY = model.rotation.y;
+      
+      scene.add(model);
+    },
+    undefined,
+    (error) => {
+      console.error('Error loading model:', error);
+    }
+  );
+
+  // lights
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(1, 1, 1);
+  scene.add(directionalLight);
+
+  // Add point lights for better glass effect
+  const pointLight1 = new THREE.PointLight(0xffffff, 2);
+  pointLight1.position.set(5, 5, 5);
+  scene.add(pointLight1);
+
+  const pointLight2 = new THREE.PointLight(0xffffff, 2);
+  pointLight2.position.set(-5, -5, -5);
+  scene.add(pointLight2);
+
+  // Add rim lights for better edge highlights
+  const rimLight1 = new THREE.PointLight(0xffffff, 1);
+  rimLight1.position.set(0, 5, -5);
+  scene.add(rimLight1);
+
+  const rimLight2 = new THREE.PointLight(0xffffff, 1);
+  rimLight2.position.set(0, -5, -5);
+  scene.add(rimLight2);
+
+  const renderer = new THREE.WebGLRenderer({ 
+    alpha: true,
+    antialias: true
+  });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  container.appendChild(renderer.domElement);
+
+  // Mouse event handlers
+  container.addEventListener('mousedown', (event) => {
+    isMouseDown = true;
+    const rect = container.getBoundingClientRect();
+    startMouseX = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+    currentMouseX = startMouseX;
+  });
+
+  container.addEventListener('mouseup', () => {
+    isMouseDown = false;
+  });
+
+  container.addEventListener('mouseleave', () => {
+    isMouseDown = false;
+  });
+  
+  container.addEventListener('mousemove', (event) => {
+    if (!isMouseDown) return;
+
+    const rect = container.getBoundingClientRect();
+    currentMouseX = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+    
+    // Only rotate if drag distance exceeds threshold
+    const dragDistance = Math.abs(currentMouseX - startMouseX);
+    if (dragDistance > DRAG_THRESHOLD) {
+      targetRotationY = currentMouseX * Math.PI;
+    }
+  });
+  
+  // Touch event handlers for mobile
+  container.addEventListener('touchstart', (event) => {
+    event.preventDefault(); // Prevent default touch behavior
+    isTouching = true;
+    const touch = event.touches[0];
+    const rect = container.getBoundingClientRect();
+    startTouchX = ((touch.clientX - rect.left) / container.clientWidth) * 2 - 1;
+    currentTouchX = startTouchX;
+  }, { passive: false });
+  
+  container.addEventListener('touchend', (event) => {
+    event.preventDefault();
+    isTouching = false;
+  }, { passive: false });
+  
+  container.addEventListener('touchcancel', (event) => {
+    event.preventDefault();
+    isTouching = false;
+  }, { passive: false });
+  
+  container.addEventListener('touchmove', (event) => {
+    event.preventDefault(); // Prevent default touch behavior like scrolling
+    if (!isTouching) return;
+    
+    const touch = event.touches[0];
+    const rect = container.getBoundingClientRect();
+    currentTouchX = ((touch.clientX - rect.left) / container.clientWidth) * 2 - 1;
+    
+    // Only rotate if drag distance exceeds threshold
+    const dragDistance = Math.abs(currentTouchX - startTouchX);
+    if (dragDistance > DRAG_THRESHOLD) {
+      targetRotationY = currentTouchX * Math.PI;
+    }
+  }, { passive: false });
+
+  // Animation loop
+  function animate() {
+    requestAnimationFrame(animate);
+
+    if (model) {
+      // Rotate when dragging with mouse or touch
+      if ((isMouseDown && Math.abs(currentMouseX - startMouseX) > DRAG_THRESHOLD) || 
+          (isTouching && Math.abs(currentTouchX - startTouchX) > DRAG_THRESHOLD)) {
+        currentRotationY += (targetRotationY - currentRotationY) * 0.1;
+        model.rotation.y = currentRotationY;
+      }
+
+      // Animate all meshes
+      time += 0.01;
+      animatedMeshes.forEach(({ mesh, originalPositions }) => {
+        if (mesh.geometry) {
+          const positions = mesh.geometry.attributes.position.array;
+          
+          for (let i = 0; i < positions.length; i += 3) {
+            const y = originalPositions[i + 1]; // Y coordinate
+            const factor = mesh.name === 'Object_4' || mesh.name === 'Object_5' 
+              ? 0.5  // Reduced movement for skin parts
+              : 1.0; // Full movement for snakes and details
+              
+            // Create wave-like movement with varying intensity
+            positions[i] = originalPositions[i] + 
+              Math.sin(time * WAVE_SPEED + y * 2) * WAVE_INTENSITY * factor; // X movement
+            positions[i + 2] = originalPositions[i + 2] + 
+              Math.cos(time * WAVE_SPEED + y * 2) * WAVE_INTENSITY * factor; // Z movement
+          }
+          
+          mesh.geometry.attributes.position.needsUpdate = true;
+        }
+      });
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+</script>
+
+<style>
+  #scene-container {
+    position: relative;
+    overflow: hidden;
+    touch-action: none; /* Prevent default touch behaviors */
+  }
+  
+  #scene-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style> 
