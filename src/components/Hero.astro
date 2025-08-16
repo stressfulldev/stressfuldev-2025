@@ -5,12 +5,14 @@ interface Props {
   title?: string;
   subtitle?: string;
   description?: string;
+  quote?: string;
 }
 
 const { 
   title = "Hi, I'm Hans Luber",
-  subtitle = "Full Stack Developer",
-  description = "Crafting digital experiences with code and creativity. Specializing in modern web development and innovative solutions."
+  subtitle = "Software Engineer",
+  description = "Currently, I'm in love with the world of Event-Driven Architecture.",
+  quote = `"An event is the smallest truth in life — it tells us what happened, when it happened, and why it matters."`
 } = Astro.props;
 ---
 
@@ -34,6 +36,9 @@ const {
         </h2>
         <p class="text-lg text-gray-400 font-mono leading-relaxed max-w-xl animate-text-color-delayed-2">
           {description}
+        </p>
+        <p class="text-sm italic text-gray-400 font-mono leading-relaxed max-w-xl animate-text-color-delayed-2">
+          {quote}
         </p>
         <!-- <div class="flex space-x-4 pt-4">
           <a href="/contact" class="px-6 py-3 bg-white text-black rounded-lg font-mono font-bold hover:bg-gray-200 transition-colors">
